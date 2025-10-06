@@ -42,10 +42,19 @@ export function Navbar() {
   const MobileMenu = () => (
      <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
         <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="h-14 w-14 rounded-full">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Open menu</span>
-            </Button>
+            { user ? (
+                <Button variant="ghost" className="relative h-14 w-14 rounded-full">
+                    <Avatar className="h-14 w-14">
+                        <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
+                        <AvatarFallback><UserIcon /></AvatarFallback>
+                    </Avatar>
+                </Button>
+            ) : (
+                <Button variant="outline" size="icon" className="h-14 w-14 rounded-full">
+                    <Menu className="h-6 w-6" />
+                    <span className="sr-only">Open menu</span>
+                </Button>
+            )}
         </SheetTrigger>
         <SheetContent>
             <SheetHeader>
@@ -125,11 +134,17 @@ export function Navbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-lg font-medium leading-none">{user.displayName}</p>
-                  <p className="text-base leading-none text-muted-foreground">
-                    {user.email}
-                  </p>
+                <div className="flex items-center space-x-4">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
+                    <AvatarFallback><UserIcon /></AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-lg font-medium leading-none">{user.displayName}</p>
+                    <p className="text-base leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -172,7 +187,18 @@ export function Navbar() {
             <span className="ml-2 text-2xl font-bold">CipherLock</span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-4">
-          {isMobile ? <MobileMenu /> : <DesktopMenu />}
+          {isMobile ? (
+            user ? <MobileMenu /> : (
+              <>
+                <ThemeToggle />
+                <Button asChild size="lg" className="h-14 text-lg rounded-full">
+                    <Link href="/auth">Sign In</Link>
+                </Button>
+              </>
+            )
+          ) : (
+            <DesktopMenu />
+          )}
         </div>
       </nav>
     </header>
