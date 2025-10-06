@@ -18,6 +18,13 @@ const CustomCursor = () => {
       const { clientX, clientY } = e;
       cursorDot.style.left = `${clientX - cursorDot.offsetWidth / 2}px`;
       cursorDot.style.top = `${clientY - cursorDot.offsetHeight / 2}px`;
+
+      const target = e.target as HTMLElement;
+      if (target.closest('footer')) {
+          cursorWrapper.classList.add('on-dark-bg');
+      } else {
+          cursorWrapper.classList.remove('on-dark-bg');
+      }
     };
 
     const handleMouseOver = (e: MouseEvent) => {
@@ -26,12 +33,6 @@ const CustomCursor = () => {
         
         if (interactiveTarget) {
             cursorWrapper.classList.add('pointer');
-            const computedStyle = window.getComputedStyle(interactiveTarget);
-            const textColor = computedStyle.getPropertyValue('color');
-
-            if(cursorDot) {
-                cursorDot.style.borderColor = textColor;
-            }
         }
     };
 
@@ -41,10 +42,6 @@ const CustomCursor = () => {
 
         if (interactiveTarget) {
             cursorWrapper.classList.remove('pointer');
-             if(cursorDot) {
-                cursorDot.style.borderColor = ''; 
-                cursorDot.style.backgroundColor = '';
-            }
         }
     };
 
