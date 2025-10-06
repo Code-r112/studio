@@ -62,7 +62,7 @@ export default function AuthPage() {
                 <CardContent className="flex flex-col items-center gap-8">
                 <Button 
                     onClick={signInWithGoogle} 
-                    className="w-full max-w-md h-16 text-xl" 
+                    className="w-full max-w-md h-16 text-xl rounded-full" 
                     disabled={loading}
                     size="lg"
                 >
