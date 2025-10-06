@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Unlock, KeyRound, Download, CheckCircle, Files, Sparkles, Copy, Save, ShieldAlert } from "lucide-react";
+import { Loader2, Unlock, KeyRound, Download, CheckCircle, Files, Save, ShieldAlert } from "lucide-react";
 import CryptoJS from 'crypto-js';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
@@ -69,23 +69,6 @@ export function DecryptPanel() {
     if (e.target.files) {
       setFiles(Array.from(e.target.files));
     }
-  };
-
-  const handleGenerateKey = () => {
-    const randomKey = Array.from(window.crypto.getRandomValues(new Uint8Array(32)))
-      .map((b) => String.fromCharCode(b))
-      .join('')
-      .replace(/[^a-zA-Z0-9!@#$%^&*()_+-=[]{}|;:,.<>?]/g, '')
-      .slice(0, 32);
-    setKey(randomKey);
-  };
-  
-  const handleCopyKey = () => {
-    navigator.clipboard.writeText(key);
-    toast({
-      title: "Key Copied",
-      description: "The secret key has been copied to your clipboard.",
-    });
   };
 
   const handleSaveKey = async () => {
@@ -265,8 +248,6 @@ export function DecryptPanel() {
                )}
               <div className="flex items-center gap-2">
                 <Input id="key-decrypt" type="password" value={key} onChange={(e) => setKey(e.target.value)} placeholder="Enter your secret key" disabled={!step1Completed} className="h-12 text-base" />
-                {user && <Button variant="outline" size="icon" onClick={handleGenerateKey} disabled={!step1Completed}><Sparkles className="w-5 h-5"/></Button>}
-                <Button variant="outline" size="icon" onClick={handleCopyKey} disabled={!key}><Copy className="w-5 h-5"/></Button>
                  {user && (
                   <Dialog open={isSaveKeyDialogOpen} onOpenChange={setSaveKeyDialogOpen}>
                     <DialogTrigger asChild>
