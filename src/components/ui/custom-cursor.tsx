@@ -32,8 +32,24 @@ const CustomCursor = () => {
 
             if(cursorDot) {
                 cursorDot.style.borderColor = textColor;
-                const isTransparent = !bgColor || bgColor === 'transparent' || bgColor.includes('rgba(0, 0, 0, 0)');
-                cursorDot.style.backgroundColor = isTransparent ? 'hsl(var(--foreground) / 0.1)' : bgColor;
+                const isTransparent = !bgColor || bgColor === 'transparent' || bgColor.startsWith('rgba(0, 0, 0, 0)');
+                 
+                // Only change background for non-dark backgrounds to avoid it getting lost
+                if (isTransparent) {
+                    cursorDot.style.backgroundColor = 'hsl(var(--foreground) / 0.1)';
+                } else {
+                    const rgb = bgColor.match(/\d+/g);
+                    if (rgb) {
+                        const brightness = Math.round(((parseInt(rgb[0]) * 299) + (parseInt(rgb[1]) * 587) + (parseInt(rgb[2]) * 114)) / 1000);
+                        if (brightness > 125) { // It's a light background
+                             cursorDot.style.backgroundColor = bgColor;
+                        } else { // It's a dark background, keep it transparent
+                             cursorDot.style.backgroundColor = 'transparent';
+                        }
+                    } else {
+                         cursorDot.style.backgroundColor = 'hsl(var(--foreground) / 0.1)';
+                    }
+                }
             }
         }
     };
