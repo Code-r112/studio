@@ -7,13 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Unlock, KeyRound, Download, CheckCircle, Files, Sparkles, Copy, Save } from "lucide-react";
+import { Loader2, Unlock, KeyRound, Download, CheckCircle, Files, Sparkles, Copy, Save, ShieldAlert } from "lucide-react";
 import CryptoJS from 'crypto-js';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, getDocs, query } from 'firebase/firestore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface SavedKey {
     id: string;
@@ -39,6 +48,9 @@ export function DecryptPanel() {
   const [savedKeys, setSavedKeys] = useState<SavedKey[]>([]);
   const [keyName, setKeyName] = useState('');
   const [isSaveKeyDialogOpen, setSaveKeyDialogOpen] = useState(false);
+  const [isAlertOpen, setAlertOpen] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertDescription, setAlertDescription] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -109,6 +121,12 @@ export function DecryptPanel() {
         }
     }
   }
+  
+  const showAlert = (title: string, description: string) => {
+      setAlertTitle(title);
+      setAlertDescription(description);
+      setAlertOpen(true);
+  }
 
   const handleDecrypt = () => {
     if (files.length === 0 || !key) {
@@ -144,20 +162,24 @@ export function DecryptPanel() {
             const decryptedContentHash = CryptoJS.SHA256(data).toString();
 
             if (originalHash && decryptedContentHash !== originalHash) {
-                throw new Error("File integrity check failed. The file may have been tampered with or is corrupted.");
+                showAlert(
+                    `File Integrity Check Failed for ${file.name}`,
+                    "This file may have been tampered with or corrupted since it was encrypted. The content does not match its original signature. Do not trust this file's content."
+                );
+                // We stop processing this file but don't throw an error that would be caught by the generic toast.
+            } else {
+                const blob = dataUriToBlob(data);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                successCount++;
+                logActivity(file.name, key);
             }
-
-            const blob = dataUriToBlob(data);
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = name;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            successCount++;
-            logActivity(file.name, key);
 
           } catch (error: any) {
             toast({
@@ -198,6 +220,7 @@ export function DecryptPanel() {
   const step2Completed = key.length > 0;
   
   return (
+    <>
     <Card className="border-none shadow-none">
       <CardHeader>
         <CardTitle className="text-2xl">Decrypt File(s)</CardTitle>
@@ -286,7 +309,23 @@ export function DecryptPanel() {
         
       </CardContent>
     </Card>
+    <AlertDialog open={isAlertOpen} onOpenChange={setAlertOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                    <ShieldAlert className="h-6 w-6" /> {alertTitle}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-base">
+                    {alertDescription}
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogAction onClick={() => setAlertOpen(false)}>
+                    Understood
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
-
-    
