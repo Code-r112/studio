@@ -169,10 +169,12 @@ export function DecryptPanel() {
             processedCount++;
             if (processedCount === files.length) {
               setLoading(false);
-              toast({
-                title: "Decryption Complete",
-                description: `${successCount} of ${files.length} file(s) decrypted successfully.`,
-              });
+              if (successCount > 0) {
+                toast({
+                  title: "Decryption Complete",
+                  description: `${successCount} of ${files.length} file(s) decrypted successfully.`,
+                });
+              }
             }
           }
         };
@@ -286,3 +288,5 @@ export function DecryptPanel() {
     </Card>
   );
 }
+
+    
